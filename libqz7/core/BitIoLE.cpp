@@ -1,5 +1,5 @@
-#include "BitIoLE.h"
-#include "Error.h"
+#include "qz7/BitIoLE.h"
+#include "qz7/Error.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QIODevice>

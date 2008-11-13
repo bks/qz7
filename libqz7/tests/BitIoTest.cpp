@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "BitIoLE.h"
-#include "Error.h"
+#include "qz7/BitIoLE.h"
+#include "qz7/Error.h"
 
 using namespace qz7;
 

@@ -189,8 +189,9 @@ private:
         CompressionMethod compressionMethod : 17;
         HostOperatingSystem hostOs : 5;
         ItemType type : 4;
-        uint whiteout : 1;
-        uint encrypted : 1;
+        bool whiteout : 1;
+        bool encrypted : 1;
+        uint spareBits : 4;
     };
 
     QSharedDataPointer<Private> d;

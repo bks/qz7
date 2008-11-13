@@ -24,8 +24,9 @@ Registry::~Registry()
 void Registry::loadPlugins()
 {
     // load the static plugins
-    foreach (QObject *instance, QPluginLoader::staticInstances())
+    foreach (QObject *instance, QPluginLoader::staticInstances()) {
         registerPlugin(instance);
+    }
 
     QSet<QString> considered;
 
@@ -53,6 +54,7 @@ void Registry::loadPlugins()
                 registerPlugin(plugin);
             }
         }
+    }
 }
 
 void Registry::registerPlugin(QObject *instance)
@@ -64,17 +66,23 @@ void Registry::registerPlugin(QObject *instance)
     }
 
     if (CodecFactory *cf = qobject_cast<CodecFactory *>(instance)) {
-        foreach (const QString& name, cf->codecNames()) {
-            codecsByName.insert(name, instance);
+        foreach (const QString& name, cf->decoderNames()) {
+            decodersByName.insert(name, instance);
         }
-        foreach (int id, cf->codecIds()) {
-            codecsById.insert(id, instance);
+        foreach (int id, cf->decoderIds()) {
+            decodersById.insert(id, instance);
+        }
+        foreach (const QString& name, cf->encoderNames()) {
+            encodersByName.insert(name, instance);
+        }
+        foreach (int id, cf->encoderIds()) {
+            encodersById.insert(id, instance);
         }
     }
 
     if (VolumeFactory *vf = qobject_cast<VolumeFactory *>(instance)) {
         foreach (const QString& type, vf->volumeMimeTypes()) {
-            volumesByName.insert(type, instance);
+            volumesByMimeType.insert(type, instance);
         }
     }
 }
@@ -84,14 +92,24 @@ QObject *Registry::findArchive(const QString& mimeType)
     return archivesByMimeType.value(mimeType);
 }
 
-QObject *Registry::findCodec(const QString& name)
+QObject *Registry::findDecoder(const QString& name)
 {
-    return codecsByName.value(name);
+    return decodersByName.value(name);
 }
 
-QObject *Registry::findCodec(int id)
+QObject *Registry::findDecoder(int id)
 {
-    return codecsById.value(id);
+    return decodersById.value(id);
+}
+
+QObject *Registry::findEncoder(const QString& name)
+{
+    return encodersByName.value(name);
+}
+
+QObject *Registry::findEncoder(int id)
+{
+    return encodersById.value(id);
 }
 
 QObject *Registry::findVolume(const QString& type)
@@ -109,10 +127,8 @@ Registry *Registry::the()
     return s_instance;
 }
 
-Archive *Registry::createArchive(const QString& mimeType, QObject *volume)
+Archive *Registry::createArchive(const QString& mimeType, Volume *volume)
 {
-    Q_ASSERT(qobject_cast<Volume *>(volume) != 0);
-
     QObject *o = the()->findArchive(mimeType);
 
     if (!o)
@@ -124,9 +140,9 @@ Archive *Registry::createArchive(const QString& mimeType, QObject *volume)
     return factory->createArchive(mimeType, volume);
 }
 
-Codec *Registry::createCodec(const QString& name, QObject *parent)
+Codec *Registry::createDecoder(const QString& name, QObject *parent)
 {
-    QObject *o = the()->findCodec(name);
+    QObject *o = the()->findDecoder(name);
 
     if (!o)
         return 0;
@@ -134,12 +150,12 @@ Codec *Registry::createCodec(const QString& name, QObject *parent)
     CodecFactory *factory = qobject_cast<CodecFactory *>(o);
     Q_ASSERT(factory);
 
-    return factory->createCodec(name, parent);
+    return factory->createDecoder(name, parent);
 }
 
-Codec *Registry::createCodec(int id, QObject *parent)
+Codec *Registry::createDecoder(int id, QObject *parent)
 {
-    QObject *o = the()->findCodec(id);
+    QObject *o = the()->findDecoder(id);
 
     if (!o)
         return 0;
@@ -147,7 +163,33 @@ Codec *Registry::createCodec(int id, QObject *parent)
     CodecFactory *factory = qobject_cast<CodecFactory *>(o);
     Q_ASSERT(factory);
 
-    return factory->createCodec(id, parent);
+    return factory->createDecoder(id, parent);
+}
+
+Codec *Registry::createEncoder(const QString& name, QObject *parent)
+{
+    QObject *o = the()->findEncoder(name);
+
+    if (!o)
+        return 0;
+
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createEncoder(name, parent);
+}
+
+Codec *Registry::createEncoder(int id, QObject *parent)
+{
+    QObject *o = the()->findEncoder(id);
+
+    if (!o)
+        return 0;
+
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createEncoder(id, parent);
 }
 
 Volume *Registry::createVolume(const QString& mime, QObject *parent)
@@ -162,3 +204,5 @@ Volume *Registry::createVolume(const QString& mime, QObject *parent)
 
     return factory->createVolume(mime, parent);
 }
+
+} // namespace qz7

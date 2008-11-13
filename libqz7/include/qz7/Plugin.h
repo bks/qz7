@@ -1,8 +1,10 @@
 #ifndef QZ7_PLUGIN_H
 #define QZ7_PLUGIN_H
 
+#include <QtCore/QtPlugin>
+#include <QtCore/QMap>
+
 template<typename T> class QList;
-template<typename K, typename V> class QMap;
 class QObject;
 class QString;
 class QStringList;
@@ -37,11 +39,13 @@ public:
     virtual Volume *createVolume(const QString& type, QObject *parent) const;
 };
 
-class QZ7_EXPORT Registry {
+class Registry {
 public:
-    static Archive *createArchive(const QString& mimeType, QObject *volume);
-    static Codec *createCodec(const QString& name, QObject *parent);
-    static Codec *createCodec(int id, QObject *parent);
+    static Archive *createArchive(const QString& mimeType, Volume *volume);
+    static Codec *createDecoder(const QString& name, QObject *parent);
+    static Codec *createDecoder(int id, QObject *parent);
+    static Codec *createEncoder(const QString& name, QObject *parent);
+    static Codec *createEncoder(int id, QObject *parent);
     static Volume *createVolume(const QString& mimeType, QObject *parent);
 
 private:
@@ -50,19 +54,23 @@ private:
     void loadPlugins();
     void registerPlugin(QObject *instance);
     QObject *findArchive(const QString& mimeType);
-    QObject *findCodec(const QString& name);
-    QObject *findCodec(int id);
+    QObject *findDecoder(const QString& name);
+    QObject *findDecoder(int id);
+    QObject *findEncoder(const QString& name);
+    QObject *findEncoder(int id);
     QObject *findVolume(const QString& type);
 
     static Registry *the();
 
-    QMap<QString, Object *> archivesByMimeType;
-    QMap<QString, QObject *> codecsByName;
-    QMap<int, QObject *> codecsById;
-    QMape<QString, QObject *> volumesByMimeType;
+    QMap<QString, QObject *> archivesByMimeType;
+    QMap<QString, QObject *> decodersByName;
+    QMap<int, QObject *> decodersById;
+    QMap<QString, QObject *> encodersByName;
+    QMap<int, QObject *> encodersById;
+    QMap<QString, QObject *> volumesByMimeType;
 };
 
-enum {
+enum ExportType {
     ExportArchive = 1,
     ExportCodec = 2,
     ExportVolume = 3
