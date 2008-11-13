@@ -10,6 +10,8 @@
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 
+Q_IMPORT_PLUGIN(qz7builtin)
+
 namespace qz7 {
 
 Registry::Registry()
@@ -192,7 +194,7 @@ Codec *Registry::createEncoder(int id, QObject *parent)
     return factory->createEncoder(id, parent);
 }
 
-Volume *Registry::createVolume(const QString& mime, QObject *parent)
+Volume *Registry::createVolume(const QString& mime, const QString& memberFile, QObject *parent)
 {
     QObject *o = the()->findVolume(mime);
 
@@ -202,7 +204,7 @@ Volume *Registry::createVolume(const QString& mime, QObject *parent)
     VolumeFactory *factory = qobject_cast<VolumeFactory *>(o);
     Q_ASSERT(factory);
 
-    return factory->createVolume(mime, parent);
+    return factory->createVolume(mime, memberFile, parent);
 }
 
 } // namespace qz7

@@ -17,26 +17,26 @@ class Volume;
 
 class ArchiveFactory {
 public:
-    virtual QStringList archiveMimeTypes() const;
-    virtual Archive *createArchive(const QString& mimeType, Volume *volume) const;
+    virtual QStringList archiveMimeTypes() const = 0;
+    virtual Archive *createArchive(const QString& mimeType, Volume *volume) const = 0;
 };
 
 class CodecFactory {
 public:
-    virtual QStringList decoderNames() const;
-    virtual QList<int> decoderIds() const;
-    virtual QStringList encoderNames() const;
-    virtual QList<int> encoderIds() const;
-    virtual Codec *createDecoder(const QString& name, QObject *parent) const;
-    virtual Codec *createDecoder(int id, QObject *parent) const;
-    virtual Codec *createEncoder(const QString& name, QObject *parent) const;
-    virtual Codec *createEncoder(int id, QObject *parent) const;
+    virtual QStringList decoderNames() const = 0;
+    virtual QList<int> decoderIds() const = 0;
+    virtual QStringList encoderNames() const = 0;
+    virtual QList<int> encoderIds() const = 0;
+    virtual Codec *createDecoder(const QString& name, QObject *parent) const = 0;
+    virtual Codec *createDecoder(int id, QObject *parent) const = 0;
+    virtual Codec *createEncoder(const QString& name, QObject *parent) const = 0;
+    virtual Codec *createEncoder(int id, QObject *parent) const = 0;
 };
 
 class VolumeFactory {
 public:
-    virtual QStringList volumeMimeTypes() const;
-    virtual Volume *createVolume(const QString& type, QObject *parent) const;
+    virtual QStringList volumeMimeTypes() const = 0;
+    virtual Volume *createVolume(const QString& type, const QString& memberFile, QObject *parent) const = 0;
 };
 
 class Registry {
@@ -46,7 +46,7 @@ public:
     static Codec *createDecoder(int id, QObject *parent);
     static Codec *createEncoder(const QString& name, QObject *parent);
     static Codec *createEncoder(int id, QObject *parent);
-    static Volume *createVolume(const QString& mimeType, QObject *parent);
+    static Volume *createVolume(const QString& mimeType, const QString& memberFile, QObject *parent);
 
 private:
     Registry();

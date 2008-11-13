@@ -1,6 +1,6 @@
 project(Qz7)
 
-cmake_minimum_required(VERSION 2.6.1)
+cmake_minimum_required(VERSION 2.6.2)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 find_package(Qt4 REQUIRED)

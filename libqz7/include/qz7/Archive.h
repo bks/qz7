@@ -15,6 +15,8 @@ Q_DECLARE_METATYPE(QIODevice *)
 
 namespace qz7 {
 
+class Volume;
+
 class ArchiveItem {
 public:
     ArchiveItem() : d(0) { }
@@ -199,6 +201,7 @@ private:
 
 class Archive : public QObject {
     Q_OBJECT
+
 public:
     Archive(Volume *parent) { }
     virtual ~Archive() { }
@@ -213,7 +216,7 @@ public:
     QVariant property(const QString& prop);
 
     // these only work if canWrite() is true, and only take effect on writeTo()
-    virtual bool canWrite() const;
+    virtual bool canWrite() const = 0;
     void replaceItem(uint id, const ArchiveItem& item);
     void deleteItem(uint id);
     uint appendItem(const ArchiveItem& item);
