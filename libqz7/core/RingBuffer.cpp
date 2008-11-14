@@ -1,7 +1,7 @@
-#include "RingBuffer.h"
+#include "qz7/RingBuffer.h"
 
-#include "Error.h"
-#include "Stream.h"
+#include "qz7/Error.h"
+#include "qz7/Stream.h"
 
 #include <string.h>
 

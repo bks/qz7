@@ -1,5 +1,5 @@
 #include "DeflateDecoder.h"
-#include "Error.h"
+#include "qz7/Error.h"
 
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>

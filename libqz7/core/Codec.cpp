@@ -1,4 +1,4 @@
-#include "Codec.h"
+#include "qz7/Codec.h"
 
 namespace qz7 {
 

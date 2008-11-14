@@ -1,8 +1,8 @@
 #include <QtTest/QtTest>
 #include <QtCore/QBuffer>
 
-#include "RingBuffer.h"
-#include "Stream.h"
+#include "qz7/RingBuffer.h"
+#include "qz7/Stream.h"
 
 using namespace qz7;
 

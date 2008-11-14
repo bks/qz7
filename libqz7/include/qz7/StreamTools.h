@@ -1,7 +1,7 @@
 #ifndef QZ7_STREAM_TOOLS_H
 #define QZ7_STREAM_TOOLS_H
 
-#include "Stream.h"
+#include "qz7/Stream.h"
 
 #include <QtCore/QBuffer>
 #include <QtCore/QByteArray>

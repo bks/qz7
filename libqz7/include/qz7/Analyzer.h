@@ -1,7 +1,7 @@
 #ifndef QZ7_ANALYZER_H
 #define QZ7_ANALYZER_H
 
-#include "Stream.h"
+#include "qz7/Stream.h"
 
 namespace qz7 {
 

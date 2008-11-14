@@ -1,7 +1,7 @@
 // DeflateEncoder.cpp
 
 #include "DeflateEncoder.h"
-#include "../huffman/HuffmanEncode.h"
+#include "qz7/codec/HuffmanEncode.h"
 
 namespace Compress {
 namespace Deflate {

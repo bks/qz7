@@ -1,7 +1,7 @@
 #ifndef QZ7_BITIOLE_H
 #define QZ7_BITIOLE_H
 
-#include "Error.h"
+#include "qz7/Error.h"
 
 #include <QtCore/QtGlobal>
 

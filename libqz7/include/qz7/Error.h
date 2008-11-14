@@ -5,7 +5,7 @@
 #include <QtCore/QIODevice>
 #include <QtCore/QString>
 
-#include "Stream.h"
+#include "qz7/Stream.h"
 
 namespace qz7 {
 

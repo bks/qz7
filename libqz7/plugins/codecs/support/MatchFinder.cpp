@@ -2,8 +2,8 @@
 
 #include <string.h>
 
-#include "codec/MatchFinder.h"
-#include "codec/LzHash.h"
+#include "qz7/codec/MatchFinder.h"
+#include "qz7/codec/LzHash.h"
 
 #include <QtCore/QIODevice>
 

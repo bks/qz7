@@ -21,6 +21,8 @@ Q_DECLARE_METATYPE(qz7::ReadStream *)
 
 namespace qz7 {
 
+class Volume;
+
 class ArchiveItem {
 public:
     ArchiveItem() : d(0) { }
@@ -195,8 +197,9 @@ private:
         CompressionMethod compressionMethod : 17;
         HostOperatingSystem hostOs : 5;
         ItemType type : 4;
-        uint whiteout : 1;
-        uint encrypted : 1;
+        bool whiteout : 1;
+        bool encrypted : 1;
+        uint spareBits : 4;
     };
 
     QSharedDataPointer<Private> d;
@@ -204,6 +207,7 @@ private:
 
 class Archive : public QObject {
     Q_OBJECT
+
 public:
     Archive(Volume *parent) { }
     virtual ~Archive() { }
@@ -217,6 +221,7 @@ public:
     virtual bool canWrite() const = 0;
     bool writeTo(QIODevice *target);
     virtual bool writeTo(WriteStream *target) = 0;
+
     void replaceItem(uint id, const ArchiveItem& item);
     void deleteItem(uint id);
     uint appendItem(const ArchiveItem& item);

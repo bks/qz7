@@ -3,11 +3,12 @@
 #ifndef QZ7_DEFLATEENCODER_H
 #define QZ7_DEFLATEENCODER_H
 
-#include "Codec.h"
-#include "BitIoLE.h"
+#include "qz7/Codec.h"
+#include "qz7/BitIoLE.h"
+
+#include "qz7/codec/MatchFinder.h"
 
 #include "DeflateConst.h"
-#include "codec/MatchFinder.h"
 
 namespace Compress {
 namespace Deflate {

@@ -2,7 +2,7 @@
 
 #include <QtCore/QObject>
 
-#include "Sort.h"
+#include "qz7/Sort.h"
 
 #define HeapSortDown(p, k, size, temp) \
   { for (;;) { \

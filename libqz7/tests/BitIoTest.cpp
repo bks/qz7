@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "BitIoBE.h"
-#include "BitIoLE.h"
-#include "Error.h"
-#include "Stream.h"
+#include "qz7/BitIoBE.h"
+#include "qz7/BitIoLE.h"
+#include "qz7/Error.h"
+#include "qz7/Stream.h"
 
 using namespace qz7;
 

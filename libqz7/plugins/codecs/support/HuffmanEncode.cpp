@@ -1,5 +1,5 @@
-#include "codec/HuffmanEncode.h"
-#include "Sort.h"
+#include "qz7/codec/HuffmanEncode.h"
+#include "qz7/Sort.h"
 
 #define MaxLen 16
 #define NUM_BITS 10

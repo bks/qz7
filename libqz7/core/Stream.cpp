@@ -1,4 +1,4 @@
-#include "Stream.h"
+#include "qz7/Stream.h"
 
 #include <QtCore/QIODevice>
 #include <QtCore/QString>
@@ -113,6 +113,36 @@ QioSeekableReadStream::QioSeekableReadStream(QIODevice *dev)
 
 QioSeekableReadStream::~QioSeekableReadStream()
 {
+}
+
+bool QioSeekableReadStream::read(quint8 *buffer, int bytes)
+{
+    return QioReadStream::read(buffer, bytes);
+}
+
+int QioSeekableReadStream::readSome(quint8 *buffer, int minBytes, int maxBytes)
+{
+    return QioReadStream::readSome(buffer, minBytes, maxBytes);
+}
+
+bool QioSeekableReadStream::skipForward(qint64 bytes)
+{
+    return QioReadStream::skipForward(bytes);
+}
+
+bool QioSeekableReadStream::atEnd() const
+{
+    return QioReadStream::atEnd();
+}
+
+qint64 QioSeekableReadStream::bytesRead() const
+{
+    return QioReadStream::bytesRead();
+}
+
+QString QioSeekableReadStream::errorString() const
+{
+    return QioReadStream::errorString();
 }
 
 qint64 QioSeekableReadStream::pos() const

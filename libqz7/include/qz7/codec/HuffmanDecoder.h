@@ -1,9 +1,9 @@
 #ifndef QZ7_HUFFMANDECODER_H
 #define QZ7_HUFFMANDECODER_H
 
-#include "Error.h"
-#include "BitIoBE.h"
-#include "BitIoLE.h"
+#include "qz7/Error.h"
+#include "qz7/BitIoBE.h"
+#include "qz7/BitIoLE.h"
 
 namespace qz7 {
 

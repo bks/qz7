@@ -59,12 +59,12 @@ public:
     QioSeekableReadStream(QIODevice *dev);
     virtual ~QioSeekableReadStream();
 
-    using QioReadStream::read;
-    using QioReadStream::readSome;
-    using QioReadStream::skipForward;
-    using QioReadStream::atEnd;
-    using QioReadStream::bytesRead;
-    using QioReadStream::errorString;
+    virtual bool read(quint8 *buffer, int bytes);
+    virtual int readSome(quint8 *buffer, int minBytes, int maxBytes);
+    virtual bool skipForward(qint64 bytes);
+    virtual bool atEnd() const;
+    virtual qint64 bytesRead() const;
+    virtual QString errorString() const;
 
     virtual qint64 pos() const;
     virtual bool setPos(qint64 pos);

@@ -1,102 +1,210 @@
-#include "Registry.h"
-#include "Archive.h"
-#include "Codec.h"
-#include "Volume.h"
+#include "qz7/Plugin.h"
 
-#include <QtCore/QHash>
+#include <QtCore/QCoreApplication>
+#include <QtCore/QDir>
+#include <QtCore/QList>
+#include <QtCore/QObject>
 #include <QtCore/QMap>
+#include <QtCore/QPluginLoader>
+#include <QtCore/QSet>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 
-class QObject;
+Q_IMPORT_PLUGIN(qz7builtin)
 
 namespace qz7 {
 
-typedef QHash<QString, const VolumeInfo *> VolumeHandlerMap;
-typedef QHash<QString, const ArchiveInfo *> ArchiveHandlerMap;
-typedef QHash<QString, const CodecInfo *> CodecHandlerMap;
-typedef QMap<int, const CodecInfo *> CodecHandlerIdMap;
-
-Q_GLOBAL_STATIC(VolumeHandlerMap, volumeHandlers)
-Q_GLOBAL_STATIC(ArchiveHandlerMap, archiveHandlers)
-Q_GLOBAL_STATIC(CodecHandlerMap, codecHandlersByName)
-Q_GLOBAL_STATIC(CodecHandlerIdMap, codecHandlersById)
-
-void RegisterVolume(const VolumeInfo *i)
+Registry::Registry()
 {
-    volumeHandlers()->insert(i->name(), i);
+    loadPlugins();
 }
 
-void RegisterCodec(const CodecInfo *i)
+Registry::~Registry()
 {
-    codecHandlersByName()->insert(i->name(), i);
-    codecHandlersById()->insert(i->id(), i);
 }
 
-void RegisterArchive(const ArchiveInfo *i)
+void Registry::loadPlugins()
 {
-    archiveHandlers()->insert(i->name(), i);
+    // load the static plugins
+    foreach (QObject *instance, QPluginLoader::staticInstances()) {
+        registerPlugin(instance);
+    }
+
+    QSet<QString> considered;
+
+    // and then load dynamic plugins from $QT_PLUGIN_PATH/qz7
+    foreach (const QString& libDir, QCoreApplication::libraryPaths()) {
+        QDir pluginsDir(libDir);
+
+        if (!pluginsDir.cd("qz7"))
+            continue;
+
+        foreach (const QString& fileName, pluginsDir.entryList(QDir::Files)) {
+            if (fileName == "." || fileName == "..")
+                continue;
+
+            QString file = pluginsDir.absoluteFilePath(fileName);
+
+            // don't try to load a plugin more than once
+            if (considered.contains(file))
+                continue;
+            considered.insert(file);
+
+            QPluginLoader loader(file);
+            QObject *plugin = loader.instance();
+            if (plugin) {
+                registerPlugin(plugin);
+            }
+        }
+    }
 }
 
-Volume * CreateVolume(const QString& mimeType, const QString& file, QObject *parent)
+void Registry::registerPlugin(QObject *instance)
 {
-    if (!volumeHandlers()->contains(mimeType))
+    if (ArchiveFactory *af = qobject_cast<ArchiveFactory *>(instance)) {
+        foreach (const QString& mime, af->archiveMimeTypes()) {
+            archivesByMimeType.insert(mime, instance);
+        }
+    }
+
+    if (CodecFactory *cf = qobject_cast<CodecFactory *>(instance)) {
+        foreach (const QString& name, cf->decoderNames()) {
+            decodersByName.insert(name, instance);
+        }
+        foreach (int id, cf->decoderIds()) {
+            decodersById.insert(id, instance);
+        }
+        foreach (const QString& name, cf->encoderNames()) {
+            encodersByName.insert(name, instance);
+        }
+        foreach (int id, cf->encoderIds()) {
+            encodersById.insert(id, instance);
+        }
+    }
+
+    if (VolumeFactory *vf = qobject_cast<VolumeFactory *>(instance)) {
+        foreach (const QString& type, vf->volumeMimeTypes()) {
+            volumesByMimeType.insert(type, instance);
+        }
+    }
+}
+
+QObject *Registry::findArchive(const QString& mimeType)
+{
+    return archivesByMimeType.value(mimeType);
+}
+
+QObject *Registry::findDecoder(const QString& name)
+{
+    return decodersByName.value(name);
+}
+
+QObject *Registry::findDecoder(int id)
+{
+    return decodersById.value(id);
+}
+
+QObject *Registry::findEncoder(const QString& name)
+{
+    return encodersByName.value(name);
+}
+
+QObject *Registry::findEncoder(int id)
+{
+    return encodersById.value(id);
+}
+
+QObject *Registry::findVolume(const QString& type)
+{
+    return volumesByMimeType.value(type);
+}
+
+Registry *Registry::the()
+{
+    static Registry *s_instance = 0;
+
+    if (!s_instance) {
+        s_instance = new Registry;
+    }
+    return s_instance;
+}
+
+Archive *Registry::createArchive(const QString& mimeType, Volume *volume)
+{
+    QObject *o = the()->findArchive(mimeType);
+
+    if (!o)
         return 0;
 
-    return volumeHandlers()->value(mimeType)->createForFile(file, parent);
+    ArchiveFactory *factory = qobject_cast<ArchiveFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createArchive(mimeType, volume);
 }
 
-Archive * CreateArchive(const QString& type, Volume *parent)
+Codec *Registry::createDecoder(const QString& name, QObject *parent)
 {
-    if (!archiveHandlers()->contains(type))
+    QObject *o = the()->findDecoder(name);
+
+    if (!o)
         return 0;
 
-    return archiveHandlers()->value(type)->createForVolume(parent);
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createDecoder(name, parent);
 }
 
-Codec * CreateDecoder(const QString& type, QObject *parent)
+Codec *Registry::createDecoder(int id, QObject *parent)
 {
-    if (!codecHandlersByName()->contains(type))
+    QObject *o = the()->findDecoder(id);
+
+    if (!o)
         return 0;
 
-    return codecHandlersByName()->value(type)->createDecoder(parent);
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createDecoder(id, parent);
 }
 
-Codec * CreateDecoder(uint id, QObject *parent)
+Codec *Registry::createEncoder(const QString& name, QObject *parent)
 {
-    if (!codecHandlersById()->contains(id))
+    QObject *o = the()->findEncoder(name);
+
+    if (!o)
         return 0;
 
-    return codecHandlersById()->value(id)->createDecoder(parent);
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createEncoder(name, parent);
 }
 
-Codec * CreateEncoder(const QString& type, QObject *parent)
+Codec *Registry::createEncoder(int id, QObject *parent)
 {
-    if (!codecHandlersByName()->contains(type))
+    QObject *o = the()->findEncoder(id);
+
+    if (!o)
         return 0;
 
-    return codecHandlersByName()->value(type)->createEncoder(parent);
+    CodecFactory *factory = qobject_cast<CodecFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createEncoder(id, parent);
 }
 
-Codec * CreateEncoder(uint id, QObject *parent)
+Volume *Registry::createVolume(const QString& mime, const QString& memberFile, QObject *parent)
 {
-    if (!codecHandlersById()->contains(id))
+    QObject *o = the()->findVolume(mime);
+
+    if (!o)
         return 0;
 
-    return codecHandlersById()->value(id)->createEncoder(parent);
+    VolumeFactory *factory = qobject_cast<VolumeFactory *>(o);
+    Q_ASSERT(factory);
+
+    return factory->createVolume(mime, memberFile, parent);
 }
 
-HandlerInfo::HandlerInfo(const QString& name, int id)
-    : mName(name), mId(id)
-{
-}
-
-QString HandlerInfo::name() const
-{
-    return mName;
-}
-
-int HandlerInfo::id() const
-{
-    return mId;
-}
-
-};
+} // namespace qz7

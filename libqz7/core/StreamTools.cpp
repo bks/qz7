@@ -1,4 +1,4 @@
-#include "StreamTools.h"
+#include "qz7/StreamTools.h"
 
 namespace qz7 {
 namespace tools {

@@ -1,11 +1,11 @@
 #ifndef QZ7_DEFLATE_DECODER_H
 #define QZ7_DEFLATE_DECODER_H
 
-#include "Codec.h"
-#include "BitIoLE.h"
-#include "RingBuffer.h"
+#include "qz7/Codec.h"
+#include "qz7/BitIoLE.h"
+#include "qz7/RingBuffer.h"
 
-#include "codec/HuffmanDecoder.h"
+#include "qz7/codec/HuffmanDecoder.h"
 
 #include "DeflateConst.h"
 

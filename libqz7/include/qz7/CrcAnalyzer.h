@@ -1,7 +1,7 @@
 #ifndef QZ7_CRC_ANALYZER_H
 #define QZ7_CRC_ANALYZER_H
 
-#include "Analyzer.h"
+#include "qz7/Analyzer.h"
 
 namespace qz7 {
 
