@@ -209,8 +209,8 @@ class Archive : public QObject {
     Q_OBJECT
 
 public:
-    Archive(Volume *parent) { }
-    virtual ~Archive() { }
+    Archive(Volume *parent);
+    virtual ~Archive();
 
     // the following return false on error
     virtual bool open() = 0;
@@ -249,6 +249,8 @@ signals:
     void unhandledFormatExtension(const QString& archiveFormat, const QString& extension);
 
 protected:
+    SeekableReadStream *openFile(uint n);
+
     void addItem(const ArchiveItem& item);
     void setProperty(const QString& prop, const QVariant& val);
     void setErrorString(const QString& str);
@@ -256,10 +258,13 @@ protected:
     QList<ArchiveItem> normalizedItems() const;
 
 private:
+    Volume *mVolume;
     QList<ArchiveItem> mItems;
     QMap<uint, ArchiveItem> mModifications;
     QHash<QString, QVariant> mProperties;
     QString mErrorString;
+    uint mAddedItems;
+    uint mNextId;
 };
 
 }

@@ -3,6 +3,7 @@ add_subdirectory(tests)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(core_SRCS
+    core/Archive.cpp
     core/BitIoBE.cpp
     core/BitIoLE.cpp
     core/Codec.cpp
@@ -23,6 +24,7 @@ set(codecs_SRCS
 )
 
 set(archive_SRCS
+   plugins/archives/gzip/GzipArchive.cpp
 )
 
 set(volume_SRCS
