@@ -222,6 +222,9 @@ public:
     bool writeTo(QIODevice *target);
     virtual bool writeTo(WriteStream *target) = 0;
 
+    // this may be called from another thread to interrupt the current job
+    virtual void interrupt() = 0;
+
     void replaceItem(uint id, const ArchiveItem& item);
     void deleteItem(uint id);
     uint appendItem(const ArchiveItem& item);
@@ -235,8 +238,13 @@ public:
 signals:
     void totalItems(uint nr);
     void itemLoaded(uint id, const ArchiveItem& item);
+    void opened();
+
     void progress(quint64 bytesIn, quint64 bytesOut);
     void itemWritten(uint id, const ArchiveItem& item, qint64 bytesInt, quint64 bytesOut);
+    void extractFinished();
+    void writeFinished();
+
     void archiveFormatWarning(const QString& archiveFormat, const QString& text);
     void unhandledFormatExtension(const QString& archiveFormat, const QString& extension);
 

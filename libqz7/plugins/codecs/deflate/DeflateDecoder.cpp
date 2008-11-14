@@ -236,14 +236,18 @@ void BaseDecoder::codeChunk(quint32 curSize)
     return;
 }
 
-void BaseDecoder::stream(ReadStream *sourceStream, WriteStream *destinationStream)
+bool BaseDecoder::stream(ReadStream *sourceStream, WriteStream *destinationStream)
 {
+    mInterrupted = 0;
     mBitStream.setBackingStream(sourceStream);
     mOutBuffer.setBackingStream(destinationStream);
 
     const quint64 start = destinationStream->bytesWritten();
     mRemainLen = LenIdNeedInit;
     for (;;) {
+        if (mInterrupted)
+            return false;
+
         quint32 curSize = 1 << 18;
         if (mBytesExpected != 0) {
             mOutBuffer.flush();
@@ -265,6 +269,12 @@ void BaseDecoder::stream(ReadStream *sourceStream, WriteStream *destinationStrea
         emit progress(inSize, nowPos64);
     }
     mOutBuffer.flush();
+    return true;
+}
+
+void BaseDecoder::interrupt()
+{
+    mInterrupted = 1;
 }
 
 bool BaseDecoder::setProperty(const QString& property, const QVariant& value)

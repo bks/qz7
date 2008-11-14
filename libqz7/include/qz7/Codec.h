@@ -18,8 +18,12 @@ public:
     Codec(QObject *parent = 0);
     virtual ~Codec();
 
-    // this throws an exception on error
-    virtual void stream(ReadStream *from, WriteStream *to) = 0;
+    // returns true on success, false on interrupted, and throws an exception on error
+    virtual bool stream(ReadStream *from, WriteStream *to) = 0;
+
+    // interupt() is meant to be called from possibly a different thread than the one
+    // the Codec is executing on
+    virtual void interrupt() = 0;
 
     // these return false or empty on failure or error
     virtual bool setProperty(const QString& property, const QVariant& value) = 0;

@@ -27,7 +27,8 @@ public:
     void setKeepHistory(bool keepHistory) { mKeepHistory = keepHistory; }
     void setExpectedSize(quint64 size) { mBytesExpected = size; }
 
-    virtual void stream(ReadStream *from, WriteStream *to);
+    virtual bool stream(ReadStream *from, WriteStream *to);
+    virtual void interrupt();
     virtual bool setProperty(const QString& property, const QVariant& value);
     virtual QVariant property(const QString& property) const;
     virtual QByteArray serializeProperties() const;
@@ -48,6 +49,7 @@ private:
     HuffmanDecoder<NumHuffmanBits, LevelTableSize> mLevelDecoder;
 
     quint64 mBytesExpected;
+    int mInterrupted;
 
     quint32 mStoredBlockSize;
     quint32 mNumDistLevels;
