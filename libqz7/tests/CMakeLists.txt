@@ -11,4 +11,5 @@ ENDMACRO(QZ7_UNIT_TESTS)
 
 QZ7_UNIT_TESTS(
     BitIoTest
+    RingBufferTest
 )

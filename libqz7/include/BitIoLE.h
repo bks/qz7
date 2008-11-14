@@ -4,17 +4,20 @@
 #include "Error.h"
 
 #include <QtCore/QtGlobal>
-#include <QtCore/QDebug>
-
-class QIODevice;
 
 namespace qz7 {
 
+class ReadStream;
+class WriteStream;
+
 class BitReaderLE {
 public:
-    BitReaderLE(QIODevice *backingDev) : mBackingDevice(backingDev), mBuffer(new quint8[BufferSize]),
+    BitReaderLE(ReadStream *stream) : mStream(stream), mBuffer(new quint8[BufferSize]),
         mValid(0), mPos(0), mBitPos(0) { }
+    BitReaderLE() : mStream(0), mBuffer(new quint8[BufferSize]), mValid(0), mPos(0), mBitPos(0) { }
     ~BitReaderLE() { delete[] mBuffer; }
+
+    void setBackingStream(ReadStream *stream) { mStream = stream; mValid = 0; mPos = 0; mBitPos = 0; }
 
     uint peekBits(uint nrBits) {
         // check if we have enough data in our buffer to easily satisfy the request
@@ -22,17 +25,7 @@ public:
         if (needRefill(nrBits))
             return refill(nrBits);
 
-        uint pos = mPos;
-        uint ret = mBuffer[pos] >> (8 - mBitPos);
-        uint bytesNeeded = (nrBits - mBitPos + 7) / 8;
-        uint bitpos = mBitPos;
-        while (bytesNeeded > 0) {
-            ret |= mBuffer[++pos] << bitpos;
-            bitpos += 8;
-            --bytesNeeded;
-        }
-
-        return ret & ((1 << nrBits) - 1);
+        return fetchBits(nrBits);
     }
 
     uint peekReversedBits(uint nrBits) {
@@ -72,16 +65,37 @@ public:
         }
     }
 
+    void alignToByte() {
+        peekBits(8); // make sure we have another byte
+        mPos += 1;
+        mBitPos = 8;
+    }
+
     uint readBits(uint nrBits) { uint ret = peekBits(nrBits); consumeBits(nrBits); return ret; }
 
 private:
     enum { BufferSize = 4096 };
     static const quint8 BitReverseTable[256];
     bool needRefill(uint nrBits) { return ((mValid - mPos) * 8 + mBitPos) < nrBits; }
-    uint refill(uint nrBits);
-    quint8 bitReverse(quint8 b) { return BitReverseTable[b]; }
 
-    QIODevice *mBackingDevice;
+    uint fetchBits(uint nrBits) const {
+        uint pos = mPos;
+        uint ret = mBuffer[pos] >> (8 - mBitPos);
+        uint bytesNeeded = (nrBits - mBitPos + 7) / 8;
+        uint bitpos = mBitPos;
+        while (bytesNeeded > 0) {
+            ret |= mBuffer[++pos] << bitpos;
+            bitpos += 8;
+            --bytesNeeded;
+        }
+
+        return ret & ((1 << nrBits) - 1);
+    }
+
+    quint8 bitReverse(quint8 b) { return BitReverseTable[b]; }
+    uint refill(uint nrBits);
+
+    ReadStream *mStream;
     quint8 *mBuffer;
 
     // the last byte with potentially valid bits in it
@@ -96,9 +110,12 @@ private:
 
 class BitWriterLE {
 public:
-    BitWriterLE(QIODevice *backingDev) : mBackingDevice(backingDev), mBuffer(new quint8[BufferSize]),
+    BitWriterLE(WriteStream *stream) : mStream(stream), mBuffer(new quint8[BufferSize]),
         mBitPos(0) { flush(); }
+    BitWriterLE() : mStream(0), mBuffer(new quint8[BufferSize]), mBitPos(0) { flush(); }
     ~BitWriterLE() { flushByte(); flush(); delete[] mBuffer; }
+
+    void setBackingStream(WriteStream *stream) { mStream = stream; }
 
     void writeBits(uint bits, uint nrBits) {
         if (mBitPos + nrBits >= BufferSize * 8)
@@ -125,10 +142,10 @@ public:
 private:
     enum { BufferSize = 4096 };
 
-    QIODevice *mBackingDevice;
+    WriteStream *mStream;
     quint8 *mBuffer;
     uint mBitPos;
 };
 
-};
+}
 #endif

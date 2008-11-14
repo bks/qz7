@@ -4,19 +4,22 @@
 #include <QtCore/QObject>
 
 class QByteArray;
-class QIODevice;
 class QString;
 class QVariant;
 
 namespace qz7 {
 
+class ReadStream;
+class WriteStream;
+
 class Codec : public QObject {
     Q_OBJECT
 public:
-    virtual ~Codec() { }
+    Codec(QObject *parent = 0);
+    virtual ~Codec();
 
     // this throws an exception on error
-    virtual void stream(QIODevice *from, QIODevice *to) = 0;
+    virtual void stream(ReadStream *from, WriteStream *to) = 0;
 
     // these return false or empty on failure or error
     virtual bool setProperty(const QString& property, const QVariant& value) = 0;
@@ -28,6 +31,6 @@ signals:
     void progress(quint64 bytesIn, quint64 bytesOut);
 };
 
-};
+}
 
 #endif

@@ -9,9 +9,15 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
-class QIODevice;
+namespace qz7 {
 
-Q_DECLARE_METATYPE(QIODevice *)
+class ReadStream;
+class SeekableReadStream;
+class WriteStream;
+
+}
+
+Q_DECLARE_METATYPE(qz7::ReadStream *)
 
 namespace qz7 {
 
@@ -112,15 +118,15 @@ public:
     }
     void setProperty(const QString& prop, const QVariant& val) { d->properties[prop] = val; }
 
-    QIODevice *stream() const {
+    ReadStream *stream() const {
         QVariant v = property(QLatin1String("stream"));
 
         if (v.isValid())
-            return v.value<QIODevice *>();
+            return v.value<ReadStream *>();
         return 0;
     }
 
-    void setStream(QIODevice *stream) {
+    void setStream(ReadStream *stream) {
         setProperty(QLatin1String("stream"), QVariant::fromValue(stream));
     }
 
@@ -202,20 +208,24 @@ public:
     Archive(Volume *parent) { }
     virtual ~Archive() { }
 
-    // the following throw Errors
-    virtual void open() = 0;
-    virtual void extractTo(uint id, QIODevice *target) = 0;
-    virtual void writeTo(QIODevice *target) = 0;
+    // the following return false on error
+    virtual bool open() = 0;
+    bool extractTo(uint id, QIODevice *target);
+    virtual bool extractTo(uint id, WriteStream *target) = 0;
+
+    // these only work if canWrite() is true, and only take effect on writeTo()
+    virtual bool canWrite() const = 0;
+    bool writeTo(QIODevice *target);
+    virtual bool writeTo(WriteStream *target) = 0;
+    void replaceItem(uint id, const ArchiveItem& item);
+    void deleteItem(uint id);
+    uint appendItem(const ArchiveItem& item);
+
+    QString errorString() const;
 
     uint count() const;
     ArchiveItem item(uint id) const;
     QVariant property(const QString& prop);
-
-    // these only work if canWrite() is true, and only take effect on writeTo()
-    virtual bool canWrite() const;
-    void replaceItem(uint id, const ArchiveItem& item);
-    void deleteItem(uint id);
-    uint appendItem(const ArchiveItem& item);
 
 signals:
     void totalItems(uint nr);
@@ -227,16 +237,18 @@ signals:
 
 protected:
     void addItem(const ArchiveItem& item);
+    void setProperty(const QString& prop, const QVariant& val);
+    void setErrorString(const QString& str);
 
     QList<ArchiveItem> normalizedItems() const;
-    void writeCompleted();
 
 private:
     QList<ArchiveItem> mItems;
     QMap<uint, ArchiveItem> mModifications;
     QHash<QString, QVariant> mProperties;
+    QString mErrorString;
 };
 
-};
+}
 
 #endif

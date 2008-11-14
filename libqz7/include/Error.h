@@ -5,6 +5,8 @@
 #include <QtCore/QIODevice>
 #include <QtCore/QString>
 
+#include "Stream.h"
+
 namespace qz7 {
 
 class Error {
@@ -22,6 +24,14 @@ public:
     ReadError(const QIODevice *dev) : 
         Error(QCoreApplication::translate("libqz7", "the error \"%1\" occurred when reading")
                 .arg(dev->errorString())) { }
+
+    ReadError(const ReadStream *stream) :
+        Error(QCoreApplication::translate("libqz7", "the error \"%1\" occurred when reading")
+                .arg(stream->errorString())) { }
+
+    ReadError(const ReadStream& stream) :
+        Error(QCoreApplication::translate("libqz7", "the error \"%1\" occurred when reading")
+                .arg(stream.errorString())) { }
 };
 
 class WriteError : public Error {
@@ -29,6 +39,14 @@ public:
     WriteError(const QIODevice *dev) : 
         Error(QCoreApplication::translate("libqz7", "the error \"%1\" occured when writing")
                 .arg(dev->errorString())) { }
+
+    WriteError(const WriteStream *stream) :
+        Error(QCoreApplication::translate("libqz7", "the error \"%1\" occured when writing")
+                .arg(stream->errorString())) { }
+
+    WriteError(const WriteStream& stream) :
+        Error(QCoreApplication::translate("libqz7", "the error \"%1\" occured when writing")
+                .arg(stream.errorString())) { }
 };
 
 class CrcError : public Error {
@@ -53,6 +71,6 @@ public:
         Error(QCoreApplication::translate("libqz7", "the archive appears to be truncated")) { }
 };
 
-};
+}
 
 #endif

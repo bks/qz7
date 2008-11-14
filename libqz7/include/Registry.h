@@ -19,32 +19,32 @@ void RegisterVolume(const VolumeInfo *);
 void RegisterCodec(const CodecInfo *);
 void RegisterArchive(const ArchiveInfo *);
 
-template<class T> class HandlerInfo {
+class HandlerInfo {
 public:
-    HandlerInfo<T>(const QString& name, int id) : mName(name), mId(id) { }
-    QString name() const { return mName; }
-    int id() const { return mId; }
+    HandlerInfo(const QString& name, int id);
+    QString name() const;
+    int id() const;
 private:
     QString mName;
     int mId;
 };
 
-class VolumeInfo : public HandlerInfo<Volume> {
+class VolumeInfo : public HandlerInfo {
 public:
-    VolumeInfo(const QString& mimeType) : HandlerInfo<Volume>(mimeType, 0) { RegisterVolume(this); }
+    VolumeInfo(const QString& mimeType) : HandlerInfo(mimeType, 0) { RegisterVolume(this); }
     virtual Volume *createForFile(const QString& file, QObject *parent) const = 0;
 };
 
-class CodecInfo : public HandlerInfo<Codec> {
+class CodecInfo : public HandlerInfo {
 public:
-    CodecInfo(const QString& name, int id) : HandlerInfo<Codec>(name, id) { RegisterCodec(this); }
+    CodecInfo(const QString& name, int id) : HandlerInfo(name, id) { RegisterCodec(this); }
     virtual Codec *createDecoder(QObject *parent) const = 0;
     virtual Codec *createEncoder(QObject *parent) const = 0;
 };
 
-class ArchiveInfo : public HandlerInfo<Archive> {
+class ArchiveInfo : public HandlerInfo {
 public:
-    ArchiveInfo(const QString& name) : HandlerInfo<Archive>(name, 0) { RegisterArchive(this); }
+    ArchiveInfo(const QString& name) : HandlerInfo(name, 0) { RegisterArchive(this); }
     virtual Archive * createForVolume(Volume * v) const = 0;
 };
 
@@ -73,7 +73,7 @@ public:
         virtual Codec *createDecoder(QObject *parent) const { return CREATE_IN (parent); }  \
         virtual Codec *createEncoder(QObject *parent) const { return CREATE_OUT (parent); } \
     };                                                                                      \
-    static const ArchiveInfo ## Class s_export ## Class(QLatin1String(name), id);
+    static const CodecInfo ## Class s_export ## Class(QLatin1String(name), id);
 
 #define EXPORT_CODEC_READONLY(name, id, Out)    \
     EXPORT_CODEC_BASE(Out, name, id, 0; (void), new Out)
@@ -89,6 +89,6 @@ Codec * CreateEncoder(uint id, QObject *parent = 0);
 Codec * CreateDecoder(const QString& type, QObject *parent = 0);
 Codec * CreateDecoder(uint id, QObject *parent = 0);
 
-};
+}
 
 #endif
