@@ -28,11 +28,13 @@ public:
     virtual void interrupt();
 
 private:
+    bool doOpen();
+
     enum { ID1 = 0x1f, ID2 = 0x8b };
     enum { GzipMethodDeflate = 8 };
     enum { FText = 0x01, FHasCrc = 0x02, FHasExtra = 0x04, FHasName = 0x08, FHasComment = 0x10, FMBZ = 0xe0 };
     enum { XFUsedMaximumCompression = 2, XFUsedFastestCompression = 4 };
-    enum {
+    enum GzipHostFs {
         FsFAT = 0,
         FsAmiga = 1,
         FsVMS = 2,
@@ -49,6 +51,8 @@ private:
         FsRISCOS = 13,
         FsUnknown = 255
     };
+
+    static ArchiveItem::HostOperatingSystem mapToArchive(quint8 gzip);
 
     SeekableReadStream *mStream;
     Codec *mCodec;

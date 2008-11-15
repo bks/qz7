@@ -1,6 +1,7 @@
 #ifndef QZ7_ARCHIVE_H
 #define QZ7_ARCHIVE_H
 
+#include <QtCore/QDateTime>
 #include <QtCore/QHash>
 #include <QtCore/QList>
 #include <QtCore/QMap>
@@ -25,7 +26,7 @@ class Volume;
 
 class ArchiveItem {
 public:
-    ArchiveItem() : d(0) { }
+    ArchiveItem(bool valid = false) : d(0) { if (valid) d = new Private; }
     ArchiveItem(const QString& path, const QString& name) : d(new Private) { d->path = path; d->name = name; }
     ArchiveItem(const ArchiveItem& other) : d(other.d) { }
 
@@ -78,6 +79,7 @@ public:
         OS_2,
         OS400,
         QDos,
+        RiscOs,
         Tandem,
         THEOS,
         Tops20,
@@ -102,7 +104,13 @@ public:
     void setPosition(quint64 pos) { d->position = pos; }
 
     QString path() const { return d->path; }
+    void setPath(const QString& p) { d->path = p; }
+
     QString name() const { return d->name; }
+    void setName(const QString& n) { d->name = n; }
+
+    QDateTime mtime() const { return d->mtime; }
+    void setMTime(const QDateTime& mt) { d->mtime = mt; }
 
     quint32 crc() const { return d->crc; }
     void setCrc(quint32 crc) { d->crc = crc; }
@@ -190,6 +198,7 @@ private:
         quint64 uncompressedSize;
         quint64 compressedSize;
         quint64 position;
+        QDateTime mtime;
         QString path;
         QString name;
         QHash<QString, QVariant> properties;

@@ -19,13 +19,11 @@ public:
     static uint peekSymbol(BitStream& stream, uint bits);
 };
 
-template<> inline uint SymbolReader<BitReaderLE>
-    ::peekSymbol(BitReaderLE& stream, uint bits) {
+template<> inline uint SymbolReader<BitReaderLE>::peekSymbol(BitReaderLE& stream, uint bits) {
     return stream.peekReversedBits(bits);
 };
 
-template<> inline uint SymbolReader<BitReaderBE>
-    ::peekSymbol(BitReaderBE& stream, uint bits) {
+template<> inline uint SymbolReader<BitReaderBE>::peekSymbol(BitReaderBE& stream, uint bits) {
     return stream.peekBits(bits);
 };
 
@@ -107,7 +105,7 @@ private:
     quint32 m_Limits[MAX_BITS + 1];     // m_Limits[i] = value limit for symbols with length = i
     quint32 m_Positions[MAX_BITS + 1];  // m_Positions[i] = index in m_Symbols[] of first symbol with length = i
     quint32 m_Symbols[NR_SYMBOLS];
-    quint8 m_Lengths[1 << HUFFMAN_TABLE_BITS];   // Table oh length for short codes.
+    quint8 m_Lengths[1 << HUFFMAN_TABLE_BITS];   // Table of length for short codes.
 };
 
 }

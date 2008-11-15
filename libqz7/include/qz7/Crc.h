@@ -18,15 +18,12 @@
  * License along with FFmpeg; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
 #ifndef CRC_H
 #define CRC_H
-
 #include <QtCore/QtGlobal>
-
+namespace qz7 {
 quint32 CrcUpdate(quint32 crcInit, const void *buffer, size_t length);
 quint32 CrcInitValue();
 inline quint32 CrcValue(quint32 crc) { return crc ^ 0xffffffff; };
-
+}
 #endif
-

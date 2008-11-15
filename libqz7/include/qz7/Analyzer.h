@@ -19,14 +19,12 @@ public:
  * AnalyzerReadStream provides a Stream which automatically runs the Analyzer on
  * the data read from it.
  */
-template<class AnalyzerType> AnalyzerReadStream : public ReadStream {
+template<class AnalyzerType> class AnalyzerReadStream : public ReadStream {
 public:
     AnalyzerReadStream(ReadStream *stream, AnalyzerType *filter)
-        : mStream(stream), mAnalyzer(filter){ }
+        : mStream(stream), mAnalyzer(filter) { }
     ~AnalyzerReadStream() { delete mAnalyzer; }
-    
     const AnalyzerType *analyzer() const { return mAnalyzer; }
-    
     virtual bool read(quint8 *buffer, int bytes);
     virtual int readSome(quint8 *buffer, int minBytes, int maxBytes);
     virtual bool skipForward(qint64 bytes);
@@ -39,25 +37,21 @@ private:
     AnalyzerType *mAnalyzer;
 };
 
-template<class AnalyzerType> inline int AnalyzerReadStream<AnalyzerType>::read(quint8 *buffer, int bytes)
+template<class AnalyzerType> inline bool AnalyzerReadStream<AnalyzerType>::read(quint8 *buffer, int bytes)
 {
-    int r = mStream->read(buffer, bytes);
-    
-    if (r < 0 || r == 0)
-        return r;
-    
-    mAnalyzer->analyze(data, r);
-    return r;
+    bool ok = mStream->read(buffer, bytes);
+    if (!ok)
+        return ok;
+    mAnalyzer->analyze(buffer, bytes);
+    return true;
 };
 
 template<class AnalyzerType> inline int AnalyzerReadStream<AnalyzerType>::readSome(quint8 *buffer, int minBytes, int maxBytes)
 {
     int r = mStream->readSome(buffer, minBytes, maxBytes);
-    
     if (r < 0 || r == 0)
         return r;
-    
-    mAnalyzer->analyze(data, r);
+    mAnalyzer->analyze(buffer, r);
     return r;
 };
 
@@ -66,15 +60,16 @@ template<class AnalyzerType> inline bool AnalyzerReadStream<AnalyzerType>::skipF
     // we can't actually skip -- we have to read and analyze the bytes in between...
     const int bufferSize = 64 * 1024;
     quint8 buffer[bufferSize];
-    
+
     while (bytes) {
         int toRead = qMin(bytes, qint64(bufferSize));
-        int r = mStream->read(buffer, toRead);
-        if (r != toRead)
+        bool ok = mStream->read(buffer, toRead);
+        if (!ok)
             return false;
-        mAnalyzer->analyze(buffer, r);
-        bytes -= r;
+        mAnalyzer->analyze(buffer, toRead);
+        bytes -= toRead;
     }
+    return true;
 };
 
 template<class AnalyzerType> inline qint64 AnalyzerReadStream<AnalyzerType>::bytesRead() const
@@ -86,31 +81,37 @@ template<class AnalyzerType> inline QString AnalyzerReadStream<AnalyzerType>::er
 {
     return mStream->errorString();
 };
+
 /**
  * AnalyzerWriteStream provides a Stream which automatically runs an Analyzer on
  * the data written to it.
  */
-template<class AnalyzerType> AnalyzerWriteStream : public WriteStream {
+template<class AnalyzerType> class AnalyzerWriteStream : public WriteStream {
 public:
     AnalyzerWriteStream(WriteStream *stream, AnalyzerType *filter)
         : mStream(stream), mAnalyzer(filter) { }
     ~AnalyzerWriteStream() { delete mAnalyzer; }
-    
-    const AnalyzerType *analyzer() const { return mAnalyzer; }
 
+    const AnalyzerType *analyzer() const { return mAnalyzer; }
     virtual bool write(const quint8 *buffer, int bytes);
+    virtual void flush();
     virtual qint64 bytesWritten() const;
     virtual QString errorString() const;
 
 private:
     WriteStream *mStream;
-    AnalyzerType *mAnalyzer;    
+    AnalyzerType *mAnalyzer;
 };
 
 template<class AnalyzerType> inline bool AnalyzerWriteStream<AnalyzerType>::write(const quint8 *buffer, int bytes)
 {
     mAnalyzer->analyze(buffer, bytes);
     return mStream->write(buffer, bytes);
+};
+
+template<class AnalyzerType> inline void AnalyzerWriteStream<AnalyzerType>::flush()
+{
+    return mStream->flush();
 };
 
 template<class AnalyzerType> inline qint64 AnalyzerWriteStream<AnalyzerType>::bytesWritten() const
@@ -132,16 +133,15 @@ template<class AnalyzerType> inline QString AnalyzerWriteStream<AnalyzerType>::e
     class type ## ReadStream : public AnalyzerReadStream<type ## Analyzer> {    \
     public:                                                                     \
         type ## ReadStream(ReadStream *stream)                                  \
-            : AnalyzerReadStream<type ## Analyzer>(stream, new type) { }        \
+            : AnalyzerReadStream<type ## Analyzer>(stream, new type ## Analyzer) { } \
     };                                                                          \
                                                                                 \
     class type ## WriteStream : public AnalyzerWriteStream<type ## Analyzer> {  \
     public:                                                                     \
-        type ## WriteStream(ReadStream *stream)                                 \
-            : AnalyzerWriteStream<type ## Analyzer>(stream, new type) { }       \
+        type ## WriteStream(WriteStream *stream)                                \
+            : AnalyzerWriteStream<type ## Analyzer>(stream, new type ## Analyzer) { } \
     };
 
 }
 
 #endif
-

@@ -22,6 +22,8 @@
 
 #include <byteswap.h>
 
+namespace qz7 {
+
 static quint32 Crc32IeeeLeData[1024];
 static bool inited;
 
@@ -91,4 +93,6 @@ quint32 CrcUpdate(quint32 crc, const void *bufIn, size_t length)
     }
 
     return crc;
+}
+
 }

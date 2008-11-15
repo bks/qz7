@@ -4,6 +4,8 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
 
+#include <QtCore/QDebug>
+
 namespace qz7 {
 namespace deflate {
 
@@ -62,14 +64,15 @@ void BaseDecoder::decodeLevelTable(quint8 *values, int numSymbols)
 
 void BaseDecoder::readTables(void)
 {
-    quint32 fieldSize;
-    fieldSize = readBits(FinalBlockFieldSize);
-    mIsFinalBlock = (fieldSize == FinalBlock);
+    quint32 finalBlock = readBits(FinalBlockFieldSize);
+    mIsFinalBlock = (finalBlock == FinalBlock);
 
-    quint32 blockType;
-    blockType = readBits(BlockTypeFieldSize);
+    quint32 blockType = readBits(BlockTypeFieldSize);
     if (blockType > BlockTypeDynamicHuffman)
         throw CorruptedError();
+
+    qDebug() << "final block:" << finalBlock;
+    qDebug() << "block type:" << blockType;
 
     if (blockType == BlockTypeStored) {
         mStoredMode = true;
@@ -93,27 +96,22 @@ void BaseDecoder::readTables(void)
         levels.setFixedLevels();
         mNumDistLevels = (mType == Deflate64) ? DistTableSize64 : DistTableSize32;
     } else {
-        quint32 numLitLenLevels;
-        numLitLenLevels = readBits(NumLenCodesFieldSize);
-        numLitLenLevels += NumLitLenCodesMin;
-
-        mNumDistLevels = readBits(NumDistCodesFieldSize);
-        mNumDistLevels += NumDistCodesMin;
-
-        quint32 numLevelCodes;
-        numLevelCodes = readBits(NumLevelCodesFieldSize);
-        numLevelCodes += NumLevelCodesMin;
+        quint32 numLitLenLevels = readBits(NumLenCodesFieldSize) + NumLitLenCodesMin;
+        mNumDistLevels = readBits(NumDistCodesFieldSize) + NumDistCodesMin;
+        quint32 numLevelCodes = readBits(NumLevelCodesFieldSize) + NumLevelCodesMin;
 
         if (mType != Deflate64)
             if (mNumDistLevels > DistTableSize32)
+                throw CorruptedError();
+        else
+            if (mNumDistLevels > DistTableSize64)
                 throw CorruptedError();
 
         quint8 levelLevels[LevelTableSize];
         for (unsigned int i = 0; i < LevelTableSize; i++) {
             int position = CodeLengthAlphabetOrder[i];
             if (i < numLevelCodes) {
-                quint32 temp;
-                temp = readBits(LevelFieldSize);
+                quint32 temp = readBits(LevelFieldSize);
                 levelLevels[position] = temp;
             } else {
                 levelLevels[position] = 0;
@@ -131,8 +129,11 @@ void BaseDecoder::readTables(void)
         memcpy(levels.distLevels, tmpLevels + numLitLenLevels, mNumDistLevels);
     }
 
+    qDebug() << "calculating symbol list";
     mMainDecoder.setCodeLengths(levels.litLenLevels);
+    qDebug() << "calculating distance table symbol list";
     mDistDecoder.setCodeLengths(levels.distLevels);
+    qDebug() << "tables loaded";
 }
 
 void BaseDecoder::codeChunk(quint32 curSize)
@@ -180,6 +181,7 @@ void BaseDecoder::codeChunk(quint32 curSize)
         }
         while (curSize > 0) {
             quint32 symbol = mMainDecoder.decodeSymbol(mBitStream);
+            qDebug() << "symbol:" << symbol;
 
             if (symbol < SymbolEndOfBlock) {
                 mOutBuffer.putByte((quint8)symbol);

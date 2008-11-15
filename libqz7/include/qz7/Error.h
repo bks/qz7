@@ -71,6 +71,12 @@ public:
         Error(QCoreApplication::translate("libqz7", "the archive appears to be truncated")) { }
 };
 
+class InterruptedError : public Error {
+public:
+    InterruptedError() :
+        Error(QCoreApplication::translate("libqz7", "the operation was interrupted")) { }
+};
+
 }
 
 #endif

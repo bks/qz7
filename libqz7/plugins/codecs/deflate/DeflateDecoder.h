@@ -38,7 +38,7 @@ private:
     quint32 readBits(int numBits);
     void decodeLevelTable(quint8 *values, int numSymbols);
     void readTables();
-    void codeChunk(quint32 curSize); // was CodeSpec
+    void codeChunk(quint32 curSize);
 
     RingBuffer mOutBuffer;
     BitReaderLE mBitStream;

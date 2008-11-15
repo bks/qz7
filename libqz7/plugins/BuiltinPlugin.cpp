@@ -5,6 +5,8 @@
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 
+#include "archives/gzip/GzipArchive.h"
+
 #include "codecs/deflate/DeflateDecoder.h"
 
 #include "volumes/singlefile/SingleFileVolume.h"
@@ -13,11 +15,14 @@ namespace qz7 {
 
 QStringList BuiltinPlugin::archiveMimeTypes() const
 {
-    return QStringList();
+    return QStringList()
+        << "application/x-gzip";
 }
 
 Archive *BuiltinPlugin::createArchive(const QString& mimeType, Volume *volume) const
 {
+    if (mimeType == "application/x-gzip")
+        return new gzip::GzipArchive(volume);
     return 0;
 }
 
