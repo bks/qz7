@@ -21,7 +21,9 @@ BaseDecoder::BaseDecoder(DeflateType type, QObject *parent) :
 
 inline quint32 BaseDecoder::readBits(int numBits)
 {
-    return mBitStream.readBits(numBits);
+    quint32 b = mBitStream.readBits(numBits);
+    qDebug() << "readBits:" << b;
+    return b;
 }
 
 void BaseDecoder::decodeLevelTable(quint8 *values, int numSymbols)
