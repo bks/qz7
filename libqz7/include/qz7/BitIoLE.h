@@ -34,20 +34,21 @@ public:
             refill(nrBits);
 
         uint pos = mPos;
-        uint ret = bitReverse(mBuffer[pos]) >> (8 - mBitPos);
+        uint ret = bitReverse(mBuffer[pos]);
         uint bytesNeeded = (nrBits - mBitPos + 7) / 8;
-        uint bitpos = mBitPos;
+        uint bits = mBitPos;
         while (bytesNeeded > 0) {
             // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
+            ret <<= 8;
             if (++pos <= mValid)
-                ret |= bitReverse(mBuffer[pos]) << bitpos;
+                ret |= bitReverse(mBuffer[pos]);
             else
-                ret |= 0xff << bitpos;
-            bitpos += 8;
+                ret |= 0xff;
+            bits += 8;
             --bytesNeeded;
         }
 
-        return ret & ((1 << nrBits) - 1);
+        return (ret >> (bits - nrBits)) & ((1 << nrBits) - 1);
     }
 
     void consumeBits(uint nrBits) {
