@@ -207,9 +207,9 @@ bool LimitedReadStream::read(quint8 *buffer, int bytes)
 
 int LimitedReadStream::readSome(quint8 *buffer, int minBytes, int maxBytes)
 {
-    if (minBytes > mBytesLeft)
-        return -1;
-    int read = mStream->readSome(buffer, minBytes, int(qMin(qint64(maxBytes), mBytesLeft)));
+    if (!mBytesLeft)
+        return 0;
+    int read = mStream->readSome(buffer, int(qMin(qint64(minBytes), mBytesLeft)), int(qMin(qint64(maxBytes), mBytesLeft)));
     if (read >= 0)
         mBytesLeft -= read;
     return read;
