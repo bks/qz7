@@ -77,7 +77,7 @@ public:
 private:
     enum { BufferSize = 4096 };
     static const quint8 BitReverseTable[256];
-    bool needRefill(uint nrBits) { return ((mValid - mPos) * 8 + mBitPos) < nrBits; }
+    bool needRefill(uint nrBits) const { return ((mValid - mPos) * 8 + mBitPos) < nrBits; }
 
     uint fetchBits(uint nrBits) const {
         if (!nrBits)
