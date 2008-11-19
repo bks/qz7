@@ -4,7 +4,6 @@
 #include <QtCore/QByteArray>
 #include <QtCore/QVariant>
 
-#include <QtCore/QDebug>
 
 namespace qz7 {
 namespace deflate {
@@ -22,7 +21,6 @@ BaseDecoder::BaseDecoder(DeflateType type, QObject *parent) :
 inline quint32 BaseDecoder::readBits(int numBits)
 {
     quint32 b = mBitStream.readBits(numBits);
-    qDebug() << "readBits:" << b;
     return b;
 }
 
@@ -72,9 +70,6 @@ void BaseDecoder::readTables(void)
     quint32 blockType = readBits(BlockTypeFieldSize);
     if (blockType > BlockTypeDynamicHuffman)
         throw CorruptedError();
-
-    qDebug() << "final block:" << finalBlock;
-    qDebug() << "block type:" << blockType;
 
     if (blockType == BlockTypeStored) {
         mStoredMode = true;
@@ -131,11 +126,8 @@ void BaseDecoder::readTables(void)
         memcpy(levels.distLevels, tmpLevels + numLitLenLevels, mNumDistLevels);
     }
 
-    qDebug() << "calculating symbol list";
     mMainDecoder.setCodeLengths(levels.litLenLevels);
-    qDebug() << "calculating distance table symbol list";
     mDistDecoder.setCodeLengths(levels.distLevels);
-    qDebug() << "tables loaded";
 }
 
 void BaseDecoder::codeChunk(quint32 curSize)
@@ -183,7 +175,6 @@ void BaseDecoder::codeChunk(quint32 curSize)
         }
         while (curSize > 0) {
             quint32 symbol = mMainDecoder.decodeSymbol(mBitStream);
-            qDebug() << "symbol:" << symbol;
 
             if (symbol < SymbolEndOfBlock) {
                 mOutBuffer.putByte((quint8)symbol);

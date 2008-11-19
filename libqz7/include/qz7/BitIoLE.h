@@ -80,6 +80,9 @@ private:
     bool needRefill(uint nrBits) { return ((mValid - mPos) * 8 + mBitPos) < nrBits; }
 
     uint fetchBits(uint nrBits) const {
+        if (!nrBits)
+            return 0;
+
         uint pos = mPos;
         uint ret = mBuffer[pos] >> (8 - mBitPos);
         uint bytesNeeded = (nrBits - mBitPos + 7) / 8;

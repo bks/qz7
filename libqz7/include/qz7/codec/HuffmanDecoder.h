@@ -5,8 +5,6 @@
 #include "qz7/BitIoBE.h"
 #include "qz7/BitIoLE.h"
 
-#include <QtCore/QDebug>
-
 namespace qz7 {
 
 enum { HUFFMAN_TABLE_BITS = 9 };
@@ -23,7 +21,6 @@ public:
 
 template<> inline uint SymbolReader<BitReaderLE>::peekSymbol(BitReaderLE& stream, uint bits) {
     uint ret = stream.peekReversedBits(bits);
-    qDebug() << "peekSymbol:" << qPrintable(QString::number(ret, 16));
     return ret;
 };
 
