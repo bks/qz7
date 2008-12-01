@@ -1,8 +1,6 @@
 // DeflateDecoder.cpp
 #include "DeflateDecoder.h"
 
-#include <QtCore/QDebug>
-
 namespace Compress {
 namespace Deflate {
 
@@ -21,7 +19,6 @@ inline bool BaseDecoder::ReadBits(int numBits, quint32 *bitValue)
 //    Q_ASSERT(numBits >= 0);
     bool ok = mInBitStream.readBits(numBits, bitValue);
 
-    qDebug() << "readBits:" << *bitValue;
     if (!ok)
         return errorIoDevice(inputDevice());
 

@@ -7,8 +7,6 @@
 #include "kernel/BitStreamLE.h"
 #include "kernel/BitStreamBE.h"
 
-#include <QtCore/QDebug>
-
 namespace Compress {
 namespace Huffman {
 
@@ -26,7 +24,6 @@ public:
 template<> inline bool SymbolReader<BitStreamLE<QioReadBuffer> >
     ::peekSymbol(BitStreamLE<QioReadBuffer> *stream, int bits, quint32 *symbol) {
     bool ok = stream->peekReversedBits(bits, symbol);
-    qDebug() << "peekSymbol:" << qPrintable(QString::number(*symbol, 16));
     return ok;
 };
 
