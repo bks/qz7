@@ -46,7 +46,6 @@ public:
     virtual qint64 bytesRead() const;
     virtual QString errorString() const;
 
-protected:
     QIODevice *device() { return mDevice; }
     const QIODevice *device() const { return mDevice; }
 
@@ -79,7 +78,6 @@ public:
     virtual qint64 bytesWritten() const;
     virtual QString errorString() const;
 
-protected:
     QIODevice *device() { return mDevice; }
     const QIODevice *device() const { return mDevice; }
 
