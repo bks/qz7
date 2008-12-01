@@ -81,9 +81,10 @@ void BaseDecoder::readTables(void)
 
         quint32 invBlockSize;
         invBlockSize = readBits(StoredBlockLengthFieldSize);
-        if (mStoredBlockSize == (quint16)~invBlockSize)
-            return;
-        throw CorruptedError();
+        if (mStoredBlockSize != (quint16)~invBlockSize)
+            throw CorruptedError();
+
+        return;
     }
 
     mStoredMode = false;
