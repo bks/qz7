@@ -1,5 +1,4 @@
 #include "SingleFileVolume.h"
-
 #include "qz7/Stream.h"
 
 #include <QtCore/QFile>
@@ -18,8 +17,9 @@ SeekableReadStream * SingleFileVolume::openFile(uint n)
 
     QFile *file = new QFile(mFile, this);
 
-    if (file->open(QIODevice::ReadOnly))
+    if (file->open(QIODevice::ReadOnly)) {
         return new QioSeekableReadStream(file);
+    }
 
     delete file;
     return 0;
