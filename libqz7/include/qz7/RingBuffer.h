@@ -1,5 +1,5 @@
 #ifndef QZ7_RING_BUFFER_H
-#define QZ6_RING_BUFFER_H
+#define QZ7_RING_BUFFER_H
 
 #include <QtCore/QtGlobal>
 #include <QtCore/QDebug>
@@ -17,6 +17,7 @@ public:
     ~RingBuffer() { delete[] mBuffer; }
     
     void setBackingStream(WriteStream *stream) { mStream = stream; }
+    WriteStream *backingStream() const { return mStream; }
     void setBufferSize(uint size);
     void clear();
     void flush();
