@@ -18,6 +18,7 @@ public:
     ~BitReaderBE() { delete[] mBuffer; }
 
     void setBackingStream(ReadStream *stream) { mStream = stream; mValid = 0; mPos = 0; mBitPos = 0; }
+    const ReadStream *backingStream() const { return mStream; }
 
     uint peekBits(uint nrBits) {
         // check if we have enough data in our buffer to easily satisfy the request

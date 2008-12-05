@@ -18,6 +18,7 @@ public:
     ~BitReaderLE() { delete[] mBuffer; }
 
     void setBackingStream(ReadStream *stream) { mStream = stream; mValid = 0; mPos = 0; mBitPos = 0; }
+    const ReadStream *backingStream() const { return mStream; }
 
     uint peekBits(uint nrBits) {
         // check if we have enough data in our buffer to easily satisfy the request
@@ -36,7 +37,7 @@ public:
         uint pos = mPos;
         uint ret = bitReverse(mBuffer[pos]);
         uint bytesNeeded = (nrBits - mBitPos + 7) / 8;
-        uint bits = mBitPos;
+        uint bits = mBitPos + 8 * bytesNeeded;
         while (bytesNeeded > 0) {
             // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
             ret <<= 8;
@@ -44,7 +45,6 @@ public:
                 ret |= bitReverse(mBuffer[pos]);
             else
                 ret |= 0xff;
-            bits += 8;
             --bytesNeeded;
         }
 
