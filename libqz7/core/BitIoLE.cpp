@@ -8,7 +8,7 @@
 
 namespace qz7 {
 
-uint BitReaderLE::refill(uint nrBits)
+uint BitReaderLE::refill(uint nrBits, bool reversed)
 {
     // copy any potentially valid bits up to the front of the buffer
     for (uint p = mPos, b = 0; p <= mValid; p++, b++)
@@ -34,22 +34,41 @@ uint BitReaderLE::refill(uint nrBits)
     }
 
     // now actually pull together the bits from the refilled buffer
-    pos = mPos;
-    uint ret = mBuffer[pos] >> (8 - mBitPos);
-    bytesNeeded = (nrBits - mBitPos + 7) / 8;
-    uint bitpos = mBitPos;
-    while (bytesNeeded > 0) {
-        // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
-        if (++pos <= mValid) {
-            ret |= mBuffer[pos] << bitpos;
-        } else {
-            ret |= quint8(0xff) << bitpos;
+    if (!reversed) {
+        pos = mPos;
+        uint ret = mBuffer[pos] >> (8 - mBitPos);
+        bytesNeeded = (nrBits - mBitPos + 7) / 8;
+        uint bitpos = mBitPos;
+        while (bytesNeeded > 0) {
+            // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
+            if (++pos <= mValid) {
+                ret |= mBuffer[pos] << bitpos;
+            } else {
+                ret |= quint8(0xff) << bitpos;
+            }
+            bitpos += 8;
+            --bytesNeeded;
         }
-        bitpos += 8;
-        --bytesNeeded;
-    }
 
-    return ret & ((1 << nrBits) - 1);
+        return ret & ((1 << nrBits) - 1);
+    } else {
+        uint pos = mPos;
+        uint ret = bitReverse(mBuffer[pos]);
+        bytesNeeded = (nrBits - mBitPos + 7) / 8;
+        uint bits = mBitPos + 8 * bytesNeeded;
+        while (bytesNeeded > 0) {
+            // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
+            ret <<= 8;
+            if (++pos <= mValid) {
+                ret |= bitReverse(mBuffer[pos]);
+            } else {
+                ret |= 0xff;
+            }
+            --bytesNeeded;
+        }
+
+        return (ret >> (bits - nrBits)) & ((1 << nrBits) - 1);
+    }
 }
 
 const quint8 BitReaderLE::BitReverseTable[256] = {

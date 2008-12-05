@@ -1,6 +1,7 @@
 #ifndef QZ7_HUFFMANDECODER_H
 #define QZ7_HUFFMANDECODER_H
 
+#include "qz7/CompilerTools.h"
 #include "qz7/Error.h"
 #include "qz7/BitIoBE.h"
 #include "qz7/BitIoLE.h"
@@ -20,8 +21,7 @@ public:
 };
 
 template<> inline uint SymbolReader<BitReaderLE>::peekSymbol(BitReaderLE& stream, uint bits) {
-    uint ret = stream.peekReversedBits(bits);
-    return ret;
+    return stream.peekReversedBits(bits);
 };
 
 template<> inline uint SymbolReader<BitReaderBE>::peekSymbol(BitReaderBE& stream, uint bits) {
@@ -87,7 +87,7 @@ public:
 
         value = SymbolReader<TBitDecoder>::peekSymbol(bitStream, MAX_BITS);
 
-        if (value < m_Limits[HUFFMAN_TABLE_BITS]) {
+        if (likely(value < m_Limits[HUFFMAN_TABLE_BITS])) {
             numBits = m_Lengths[value >> (MAX_BITS - HUFFMAN_TABLE_BITS)];
         } else {
             for (numBits = HUFFMAN_TABLE_BITS + 1; value >= m_Limits[numBits]; numBits++)

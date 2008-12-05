@@ -51,10 +51,10 @@ private:
     qint32 mRemainLen;
     quint32 mRep0;
 
-    bool mKeepHistory : 1;
-    bool mNeedReadTable : 1;
-    bool mIsFinalBlock : 1;
-    bool mStoredMode : 1;
+    uint mKeepHistory : 1;
+    uint mNeedReadTable : 1;
+    uint mIsFinalBlock : 1;
+    uint mStoredMode : 1;
 };
 
 }

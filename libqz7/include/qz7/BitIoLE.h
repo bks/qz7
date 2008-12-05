@@ -1,6 +1,7 @@
 #ifndef QZ7_BITIOLE_H
 #define QZ7_BITIOLE_H
 
+#include "qz7/CompilerTools.h"
 #include "qz7/Error.h"
 
 #include <QtCore/QtGlobal>
@@ -23,16 +24,16 @@ public:
     uint peekBits(uint nrBits) {
         // check if we have enough data in our buffer to easily satisfy the request
         // note the refill() will synthesize extra 0xff bytes if needed to fullfill a peek request
-        if (needRefill(nrBits))
-            return refill(nrBits);
+        if (unlikely(needRefill(nrBits)))
+            return refill(nrBits, false);
 
         return fetchBits(nrBits);
     }
 
     uint peekReversedBits(uint nrBits) {
         // ensure that we have enough bytes in the buffer
-        if (needRefill(nrBits))
-            refill(nrBits);
+        if (unlikely(needRefill(nrBits)))
+            return refill(nrBits, true);
 
         uint pos = mPos;
         uint ret = bitReverse(mBuffer[pos]);
@@ -41,35 +42,34 @@ public:
         while (bytesNeeded > 0) {
             // we pad the buffer with ones; we'll throw an error if anyone actually tries to consume them
             ret <<= 8;
-            if (++pos <= mValid)
-                ret |= bitReverse(mBuffer[pos]);
-            else
-                ret |= 0xff;
+            ret |= bitReverse(mBuffer[++pos]);
             --bytesNeeded;
         }
+
 
         return (ret >> (bits - nrBits)) & ((1 << nrBits) - 1);
     }
 
     void consumeBits(uint nrBits) {
-        if (needRefill(nrBits)) {
+        if (unlikely(needRefill(nrBits))) {
             // we should always have the bits we're trying to consume!
             throw TruncatedArchiveError();
         }
 
-        if (nrBits >= mBitPos) {
-            nrBits -= mBitPos;
-            mPos += nrBits / 8 + 1;
-            mBitPos = 8 - (nrBits & 7);
-        } else {
-            mBitPos -= nrBits;
+        int bitpos = int(mBitPos) - nrBits;
+        while (bitpos < 0) {
+            ++mPos;
+            bitpos += 8;
         }
+        mBitPos = bitpos;
     }
 
     void alignToByte() {
         peekBits(8); // make sure we have another byte
-        mPos += 1;
-        mBitPos = 8;
+        if (mBitPos != 8) {
+            mPos += 1;
+            mBitPos = 8;
+        }
     }
 
     uint readBits(uint nrBits) { uint ret = peekBits(nrBits); consumeBits(nrBits); return ret; }
@@ -97,7 +97,7 @@ private:
     }
 
     quint8 bitReverse(quint8 b) { return BitReverseTable[b]; }
-    uint refill(uint nrBits);
+    uint refill(uint nrBits, bool reversed);
 
     ReadStream *mStream;
     quint8 *mBuffer;

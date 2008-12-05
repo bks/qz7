@@ -1,6 +1,7 @@
 #ifndef QZ7_BITIOBE_H
 #define QZ7_BITIOBE_H
 
+#include "qz7/CompilerTools.h"
 #include "qz7/Error.h"
 
 #include <QtCore/QtGlobal>
@@ -23,14 +24,14 @@ public:
     uint peekBits(uint nrBits) {
         // check if we have enough data in our buffer to easily satisfy the request
         // note the refill() will synthesize extra 0xff bytes if needed to fullfill a peek request
-        if (needRefill(nrBits))
+        if (unlikely(needRefill(nrBits)))
             return refill(nrBits);
 
         return fetchBits(nrBits);
     }
 
     void consumeBits(uint nrBits) {
-        if (needRefill(nrBits)) {
+        if (unlikely(needRefill(nrBits))) {
             // we should always have the bits we're trying to consume!
             throw TruncatedArchiveError();
         }
