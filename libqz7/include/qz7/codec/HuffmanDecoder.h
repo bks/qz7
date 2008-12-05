@@ -33,6 +33,8 @@ template <uint MAX_BITS, uint NR_SYMBOLS> class HuffmanDecoder
 public:
     HuffmanDecoder() {}
 
+    // gzip-ish Huffman codes can be uniquely generated from a simple
+    // sorted list of the bit lengths for each symbol
     void setCodeLengths(const quint8 *codeLengths) {
         int lenCounts[MAX_BITS + 1], tmpPositions[MAX_BITS + 1];
         int i;
