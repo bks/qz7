@@ -20,6 +20,8 @@ set(codecs_SRCS
     plugins/codecs/support/HuffmanEncode.cpp
     plugins/codecs/support/MatchFinder.cpp
     plugins/codecs/deflate/DeflateDecoder.cpp
+    plugins/codecs/deflate/DeflateDecoderST.cpp
+    plugins/codecs/deflate/DeflateDecoderMT.cpp
 #    codecs/deflate/DeflateEncoder.cpp
 )
 

@@ -56,6 +56,7 @@ private:
 
     SeekableReadStream *mStream;
     Codec *mCodec;
+    bool mInterrupted;
 };
 
 }

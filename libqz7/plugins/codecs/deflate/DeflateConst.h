@@ -43,18 +43,26 @@ enum {
 
 enum { LevelMask = 0xF };
 
-const quint8 LenStart32[FixedLenTableSize] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8,
-    10, 12, 14, 16, 20, 24, 28, 32,
-    40, 48, 56, 64, 80, 96, 112, 128,
-    160, 192, 224, 255, 0, 0
+enum {
+    MatchMinLen = 3,
+    MatchMaxLen32 = NumLenSymbols32 + MatchMinLen - 1, //256 + 2
+    MatchMaxLen64 = NumLenSymbols64 + MatchMinLen - 1, //255 + 2
+    MatchMaxLen = MatchMaxLen32
 };
 
-const quint8 LenStart64[FixedLenTableSize] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8,
-    10, 12, 14, 16, 20, 24, 28, 32,
-    40, 48, 56, 64, 80, 96, 112, 128,
-    160, 192, 224, 0, 0, 0
+// 3 == MatchMinLen
+const quint16 LenStart32[FixedLenTableSize] = {
+    3+0, 3+1, 3+2, 3+3, 3+4, 3+5, 3+6, 3+7, 3+8,
+    3+10, 3+12, 3+14, 3+16, 3+20, 3+24, 3+28, 3+32,
+    3+40, 3+48, 3+56, 3+64, 3+80, 3+96, 3+112, 3+128,
+    3+160, 3+192, 3+224, 3+255, 0, 0
+};
+
+const quint16 LenStart64[FixedLenTableSize] = {
+    3+0, 3+1, 3+2, 3+3, 3+4, 3+5, 3+6, 3+7, 3+8,
+    3+10, 3+12, 3+14, 3+16, 3+20, 3+24, 3+28, 3+32,
+    3+40, 3+48, 3+56, 3+64, 3+80, 3+96, 3+112, 3+128,
+    3+160, 3+192, 3+224, 0, 0, 0
 };
 
 const quint8 LenDirectBits32[FixedLenTableSize] = {
@@ -91,13 +99,6 @@ const quint8 CodeLengthAlphabetOrder[LevelTableSize] = {
     16, 17, 18, 0, 8, 7, 9, 6,
     10, 5, 11, 4, 12, 3, 13, 2,
     14, 1, 15
-};
-
-enum {
-    MatchMinLen = 3,
-    MatchMaxLen32 = NumLenSymbols32 + MatchMinLen - 1, //256 + 2
-    MatchMaxLen64 = NumLenSymbols64 + MatchMinLen - 1, //255 + 2
-    MatchMaxLen = MatchMaxLen32
 };
 
 enum { FinalBlockFieldSize = 1 };

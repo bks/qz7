@@ -159,6 +159,7 @@ bool GzipArchive::doOpen()
 }
 bool GzipArchive::extractTo(uint id, WriteStream *target)
 {
+    mInterrupted = false;
     if (id >= count())
         return false;
 
@@ -181,11 +182,11 @@ bool GzipArchive::extractTo(uint id, WriteStream *target)
 
     LimitedReadStream ls(mStream, item.compressedSize());
     Crc32WriteStream ws(target);
-    try {
-        if (!mCodec->stream(&ls, &ws))
-            throw InterruptedError();
-    } catch (Error e) {
-        setErrorString(e.message());
+    if (!mCodec->stream(&ls, &ws)) {
+        if (!mInterrupted)
+            setErrorString(mCodec->errorString());
+        else
+            setErrorString(tr("the operation was interrupted"));
         return false;
     }
 
@@ -210,6 +211,7 @@ void GzipArchive::interrupt()
 {
     if (mCodec)
         mCodec->interrupt();
+    mInterrupted = true;
 }
 
 }
