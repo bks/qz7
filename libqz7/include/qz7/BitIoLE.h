@@ -66,7 +66,10 @@ public:
 
     void alignToByte() {
         peekBits(8); // make sure we have another byte
+
         if (mBitPos != 8) {
+            if (needRefill(16 - mBitPos))  // can't get another byte?
+                throw TruncatedArchiveError();
             mPos += 1;
             mBitPos = 8;
         }
